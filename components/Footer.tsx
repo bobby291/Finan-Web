@@ -6,11 +6,13 @@ import {
   FaLinkedin,
   FaYoutube,
 } from "react-icons/fa6";
+import Image from "next/image";
 
 import {
   Zap,
   Globe,
   Mail,
+  Icon,
   Phone,
   MapPin,
   User,
@@ -50,13 +52,16 @@ export default function Footer() {
 
             <div className="flex items-center gap-4">
 
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black border border-[#D4A017]/40">
+              <div className="flex h-16 w-16 items-center justify-center">
 
-                <Zap
-                  size={34}
-                  strokeWidth={2}
-                  className="fill-[#D4A017] text-[#D4A017]"
-                />
+                <Image
+                    src="/tesla.png"
+                    alt="Dwell Sync Logo"
+                    width={170}
+                    height={170}
+                    className="object-contain"
+                    priority
+                /> 
 
               </div>
 
@@ -105,11 +110,11 @@ export default function Footer() {
                   text-[#D4A017]
                   transition-all
                   duration-300
-                  hover:bg-[#D4A017]
+                  hover:bg-[#a39162]
                   hover:text-black
                   "
                 >
-                  <Icon size={20} />
+                 {/**<Icon size={20} /> */}
                 </div>
               ))}
 

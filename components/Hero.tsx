@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -67,7 +68,8 @@ export default function Hero() {
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
 
-              <button
+              <Link
+                href="/login"
                 className="
                 inline-flex
                 items-center
@@ -90,7 +92,7 @@ export default function Hero() {
 
                 <ArrowRight size={22} />
 
-              </button>
+              </Link>
 
               <button
                 className="

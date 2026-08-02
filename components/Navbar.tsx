@@ -7,6 +7,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import Image from "next/image";
 
 const navLinks = [
   {
@@ -51,13 +52,15 @@ export default function Navbar() {
           <div className="relative">
 
             <div className="flex h-14 w-14 items-center justify-center rounded-full">
-              <Zap
-                className="h-11 w-11 fill-[#D4A017] text-[#D4A017]"
-                strokeWidth={1.3}
-              />
+              <Image
+                src="/tesla.png"
+                alt="Dwell Sync Logo"
+                width={170}
+                height={170}
+                className="object-contain"
+                priority
+              /> 
             </div>
-
-            <div className="absolute inset-0 rounded-full bg-[#D4A017]/20 blur-xl"></div>
 
           </div>
 
@@ -99,7 +102,7 @@ export default function Navbar() {
         {/* Desktop Button */}
 
         <Link
-          href="/login"
+          href="/signup"
           className="hidden rounded-md border border-[#D4A017] px-8 py-3 text-[17px] font-semibold text-[#D4A017] transition hover:bg-[#D4A017] hover:text-black lg:block"
         >
           Sign In

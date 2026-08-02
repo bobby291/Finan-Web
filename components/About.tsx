@@ -37,7 +37,7 @@ export default function About() {
 
             Tesla Investment provides investors with access to
             innovative opportunities inspired by one of the
-            world's most recognized technology companies.
+            worlds most recognized technology companies.
 
             <br />
             <br />
