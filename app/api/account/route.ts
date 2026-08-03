@@ -24,7 +24,10 @@ export async function GET() {
     }
 
     // Retrieve the user's wallet
-    const wallet = getUserWallet(session.email);
+    const wallet = getUserWallet(
+      session.email,
+      session.name
+    );
 
     return NextResponse.json(
       {

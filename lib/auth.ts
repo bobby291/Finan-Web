@@ -78,11 +78,26 @@ export function getUser(email: string): User | null {
   };
 }
 
-export function getUserWallet(email: string): Wallet {
-  const user = userStore.get(normalizeEmail(email));
+export function getUserWallet(
+  email: string,
+  name?: string
+): Wallet {
+  const normalizedEmail = normalizeEmail(email);
+
+  let user = userStore.get(normalizedEmail);
 
   if (!user) {
-    throw new Error("User not found");
+    if (!name) {
+      throw new Error("User not found");
+    }
+
+    user = {
+      name,
+      email: normalizedEmail,
+      password: "",
+    };
+
+    userStore.set(normalizedEmail, user);
   }
 
   return walletStore.getOrCreateWallet({

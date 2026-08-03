@@ -1,7 +1,9 @@
 "use client";  
   
 import Image from "next/image";  
-import Link from "next/link";  
+import Link from "next/link"; 
+import { useState } from "react";
+import { useRouter } from "next/navigation"; 
 import {  
   User,  
   Mail,  
@@ -11,7 +13,58 @@ import {
   ArrowLeft,  
 } from "lucide-react";  
   
-export default function SignupPage() {  
+export default function SignupPage() { 
+    const router = useRouter();
+
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+
+    // handle Signup controller
+    async function handleSignup(
+    e: React.FormEvent<HTMLFormElement>
+    ) {
+    e.preventDefault();
+
+    setLoading(true);
+    setError("");
+
+    try {
+        const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            name,
+            email,
+            password,
+        }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+        throw new Error(data.error);
+        }
+
+        router.push("/dashboard");
+
+    } catch (err) {
+        setError(
+        err instanceof Error
+            ? err.message
+            : "Something went wrong."
+        );
+    } finally {
+        setLoading(false);
+    }
+    }
+    
   return (  
     <main className="min-h-screen bg-black text-white flex">  
       {/* LEFT IMAGE */}  
@@ -51,7 +104,9 @@ export default function SignupPage() {
   
           {/* FORM */}  
   
-          <form className="space-y-8 mt-14">  
+          <form 
+          onSubmit={handleSignup}
+          className="space-y-8 mt-14">  
   
             {/* Full Name */}  
   
@@ -64,7 +119,9 @@ export default function SignupPage() {
                 <User className="text-amber-400 mr-4" size={26} />  
   
                 <input  
-                  type="text"  
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}  
                   placeholder="Enter your full name"  
                   className="flex-1 bg-transparent outline-none text-lg placeholder:text-zinc-500"  
                 />  
@@ -82,7 +139,9 @@ export default function SignupPage() {
                 <Mail className="text-amber-400 mr-4" size={26} />  
   
                 <input  
-                  type="email"  
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)} 
                   placeholder="Enter your email address"  
                   className="flex-1 bg-transparent outline-none text-lg placeholder:text-zinc-500"  
                 />  
@@ -100,12 +159,16 @@ export default function SignupPage() {
                 <Lock className="text-amber-400 mr-4" size={26} />  
   
                 <input  
-                  type="password"  
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}  
                   placeholder="Enter your password"  
                   className="flex-1 bg-transparent outline-none text-lg placeholder:text-zinc-500"  
                 />  
   
-                <button type="button">  
+                <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}>  
                   <Eye className="text-amber-400" size={24} />  
                 </button>  
               </div>  
@@ -114,15 +177,36 @@ export default function SignupPage() {
                 Password must be at least 8 characters long.  
               </p>  
             </div>  
+
+            {error && (
+                <div 
+                className="
+                rounded-2xl 
+                border 
+                border-red-500 
+                bg-red-500/10 
+                px-5 
+                py-4 
+                text-base">
+                  {error}
+
+                </div>
+            )}
   
             {/* Button */}  
   
-            <button  
-              className="w-full h-16 rounded-2xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 text-black font-bold text-2xl flex items-center justify-center gap-5 hover:scale-[1.02] duration-300"  
-            >  
-              CREATE ACCOUNT  
-  
-              <ArrowRight size={30} />  
+            <button 
+              type="submit"
+              disabled={loading} 
+              className={`w-full h-16 rounded-2xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 text-black font-bold text-2xl flex items-center justify-center gap-5 hover:scale-[1.02] duration-300 ${
+                loading ? "opacity-60 cursor-not-allowed" : "hover:scale-[1.02]"}`}  
+            >  {
+              loading ? "Creating Account...." : "CREATE ACCOUNT"
+            }
+              {
+                !loading && <ArrowRight size={30} />  
+              }
+              
             </button>  
   
             {/* Divider */}  

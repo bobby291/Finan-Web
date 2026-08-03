@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation"; 
 import {
   Mail,
   Lock,
@@ -12,6 +14,56 @@ import {
 } from "lucide-react";
 
 export default function LoginPage() {
+
+    const router = useRouter();
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+  
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+
+       // handle Login controller
+    async function handleLogin(
+    e: React.FormEvent<HTMLFormElement>
+    ) {
+    e.preventDefault();
+
+    setLoading(true);
+    setError("");
+
+    try {
+        const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            email,
+            password,
+        }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+        }
+
+      router.push("/dashboard");
+
+    } catch (err) {
+        setError(
+        err instanceof Error
+            ? err.message
+            : "Something went wrong."
+        );
+    } finally {
+        setLoading(false);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-black text-white flex">
       {/* LEFT IMAGE */}
@@ -63,7 +115,9 @@ export default function LoginPage() {
 
           {/* FORM */}
 
-          <form className="mt-12 space-y-8">
+          <form 
+          onSubmit={handleLogin}
+          className="mt-12 space-y-8">
 
             {/* EMAIL */}
 
@@ -80,6 +134,8 @@ export default function LoginPage() {
 
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
                   className="flex-1 bg-transparent outline-none text-lg placeholder:text-zinc-500"
                 />
@@ -100,12 +156,15 @@ export default function LoginPage() {
                 />
 
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   className="flex-1 bg-transparent outline-none text-lg placeholder:text-zinc-500"
                 />
 
-                <button type="button">
+                <button type="button"
+                  onClick={() => setShowPassword(!showPassword)}>
                   <Eye
                     size={24}
                     className="text-amber-400"
@@ -115,7 +174,7 @@ export default function LoginPage() {
 
               <div className="flex justify-end mt-4">
                 <Link
-                  href="/forgot-password"
+                  href="/"
                   className="text-amber-400 hover:text-yellow-300 transition"
                 >
                   Forgot Password?
@@ -123,14 +182,29 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {error && (
+                <div 
+                className="
+                rounded-2xl 
+                border 
+                border-red-500 
+                bg-red-500/10 
+                px-5 
+                py-4 
+                text-base">
+                  {error}
+
+                </div>
+            )}
+
             {/* LOGIN BUTTON */}
 
             <button
               type="submit"
-              className="w-full h-16 rounded-2xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 text-black font-bold text-2xl flex justify-center items-center gap-5 hover:scale-[1.02] transition"
+              disabled={loading}
+              className="w-full h-16 rounded-2xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 text-black font-bold text-2xl flex justify-center items-center gap-5 hover:scale-[1.02] transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              LOGIN
-
+              {loading ? "Logging In...." : "LOGIN"}
               <ArrowRight size={30} />
             </button>
 
@@ -149,7 +223,7 @@ export default function LoginPage() {
             <p className="text-center text-xl text-zinc-300">
               Don't have an account?{" "}
               <Link
-                href="/Signup"
+                href="/signup"
                 className="text-amber-400 font-semibold hover:text-yellow-300"
               >
                 Create Account
