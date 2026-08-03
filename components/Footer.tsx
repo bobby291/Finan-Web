@@ -56,7 +56,7 @@ export default function Footer() {
 
                 <Image
                     src="/tesla.png"
-                    alt="Dwell Sync Logo"
+                    alt="Tesla Logo"
                     width={170}
                     height={170}
                     className="object-contain"
