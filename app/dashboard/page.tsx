@@ -113,23 +113,18 @@ export default function DashboardPage() {
 
           {/* Logo */}
 
-          <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
 
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-yellow-300 to-amber-500 flex items-center justify-center text-black font-bold text-xl">
-              TI
-            </div>
+            <Image
+                src="/tesla.png"
+                alt="Dwell Sync Logo"
+                width={70}
+                height={100}
+                className="object-contain"
+                priority
+            /> 
 
-            <div>
-              <h2 className="text-2xl font-bold">
-                Tesla Investment
-              </h2>
-
-              <p className="text-sm text-zinc-400">
-                Investor Dashboard
-              </p>
-            </div>
-
-          </div>
+        </div>
 
           {/* Logout */}
 
