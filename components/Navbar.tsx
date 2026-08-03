@@ -150,7 +150,7 @@ export default function Navbar() {
           ))}
 
           <Link
-            href="/login"
+            href="/signup"
             onClick={() => setMenuOpen(false)}
             className="mt-6 rounded-lg border border-[#D4A017] py-4 text-center text-lg font-semibold text-[#D4A017] transition hover:bg-[#D4A017] hover:text-black"
           >
