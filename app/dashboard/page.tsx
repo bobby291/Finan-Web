@@ -31,7 +31,7 @@ export default function DashboardPage() {
         balance: 0,
         investedBalance: 0,
         totalProfit: 0,
-        totalDeposit: 0,
+        totalDeposits: 0,
         totalWithdrawals: 0,
     });
 
@@ -88,10 +88,24 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDashboard();
   }, []);
 
-  if (loading) {
+    if (loading) {
+        return (
+            <main className="min-h-screen bg-black flex items-center justify-center">
+                <div className="text-center">
+                    <div className="h-16 w-16 border-t-transparent rounded-full animate-spin mx-auto">
+                        <p className="mt-6 text-xl text-zinc-400">
+                            Loading Dashboard.....
+                        </p>
+                    </div>
+                </div>
+
+            </main>
+        )
+    }
   return (
     <main className="min-h-screen bg-[#050505] text-white">
 
@@ -151,10 +165,10 @@ export default function DashboardPage() {
             Welcome Back,
           </p>
 
-          <h1 className="text-5xl font-bold mt-2">
-            Hello{" "}
+          <h1 className="text-3xl font-bold mt-2">
+            Tesla {" "}
             <span className="text-yellow-400">
-              {user.name}
+                Investments
             </span>
           </h1>
 
@@ -211,7 +225,7 @@ export default function DashboardPage() {
               </div>
 
               <h1 className="text-6xl md:text-7xl font-extrabold mt-5 bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
-                ${wallet.balance.toFixed(2)}
+                ${wallet.balance.toFixed(2)} USD
               </h1>
 
               {/* Stats */}
@@ -249,7 +263,7 @@ export default function DashboardPage() {
                   </p>
 
                   <h4 className="text-2xl font-bold mt-2">
-                    ${wallet.totalDeposit.toFixed(2)}
+                    ${wallet.totalDeposits.toFixed(2)}
                   </h4>
 
                 </div>
@@ -427,6 +441,4 @@ export default function DashboardPage() {
 
     </main>
   );
-}
-
 }
