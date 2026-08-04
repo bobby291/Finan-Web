@@ -1,5 +1,4 @@
 // lib/validators.ts
-
 export interface SignupInput {
   name: string;
   email: string;

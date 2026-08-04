@@ -63,7 +63,7 @@ export default function SignupPage() {
     } finally {
         setLoading(false);
     }
-    }
+  }
     
   return (  
     <main className="min-h-screen bg-black text-white flex">  

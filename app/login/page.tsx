@@ -204,7 +204,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full h-16 rounded-2xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 text-black font-bold text-2xl flex justify-center items-center gap-5 hover:scale-[1.02] transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? "Logging In...." : "LOGIN"}
+              {loading ? "Logging In...." : "LOGIN"}  
               <ArrowRight size={30} />
             </button>
 

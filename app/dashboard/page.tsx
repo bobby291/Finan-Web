@@ -305,13 +305,17 @@ export default function DashboardPage() {
 
         </div>
 
-        {/* PART 2 STARTS BELOW */}        {/* Dashboard Actions */}
+        {/* PART 2 STARTS BELOW */}        
+        
+        {/* Dashboard Actions */}
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
 
           {/* Deposit */}
 
-          <button className="group rounded-3xl border border-yellow-500/10 bg-[#111111] hover:border-yellow-400 hover:bg-[#171717] transition-all duration-300 p-8">
+          <Link 
+            href={"/login"} 
+           className="group rounded-3xl border border-yellow-500/10 bg-[#111111] hover:border-yellow-400 hover:bg-[#171717] transition-all duration-300 p-8">
 
             <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-yellow-300/20 to-amber-500/20 flex items-center justify-center mx-auto group-hover:scale-110 duration-300">
               <Wallet size={38} className="text-yellow-400" />
@@ -325,7 +329,7 @@ export default function DashboardPage() {
               Fund your investment wallet.
             </p>
 
-          </button>
+          </Link>
 
           {/* Yield */}
 
