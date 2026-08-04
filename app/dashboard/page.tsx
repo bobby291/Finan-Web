@@ -143,7 +143,7 @@ export default function DashboardPage() {
           {/* Logout */}
 
           <Link
-            href="/Login"
+            href="/login"
             className="flex items-center gap-2 bg-gradient-to-r from-yellow-300 to-amber-500 text-black px-5 py-3 rounded-xl font-semibold hover:scale-105 duration-300"
           >
             <LogOut size={18} />
