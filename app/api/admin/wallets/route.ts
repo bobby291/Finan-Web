@@ -6,6 +6,9 @@ export async function GET(req: NextRequest) {
   try {
     const adminSecret = req.headers.get("x-admin-secret");
 
+    console.log("Header received:", adminSecret);
+    console.log("Env value:", process.env.ADMIN_SECRET);
+
     if (!verifyAdminSecret(adminSecret)) {
       return NextResponse.json(
         {
