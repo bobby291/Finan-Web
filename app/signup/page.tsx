@@ -89,7 +89,7 @@ export default function SignupPage() {
           {/* Heading */}  
   
           <h1 className="text-5xl font-bold leading-tight">  
-            Create Your Account.  
+            Sign In Into Your Account.  
           </h1>  
   
           <h2 className="text-5xl font-bold text-amber-400 mt-2">  
@@ -97,7 +97,7 @@ export default function SignupPage() {
           </h2>  
   
           <p className="text-zinc-400 text-lg mt-8 leading-8">  
-            Create your Tesla Investment account in seconds  
+            Sign in to your Tesla Investment account in seconds  
             <br />  
             and begin your investment journey.  
           </p>  
@@ -201,7 +201,7 @@ export default function SignupPage() {
               className={`w-full h-16 rounded-2xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 text-black font-bold text-2xl flex items-center justify-center gap-5 hover:scale-[1.02] duration-300 ${
                 loading ? "opacity-60 cursor-not-allowed" : "hover:scale-[1.02]"}`}  
             >  {
-              loading ? "Creating Account...." : "CREATE ACCOUNT"
+              loading ? "Signing In...." : "Sign IN"
             }
               {
                 !loading && <ArrowRight size={30} />  
@@ -221,15 +221,15 @@ export default function SignupPage() {
   
             {/* Login */}  
   
-            <p className="text-center text-xl text-zinc-300">  
+            {/* <p className="text-center text-xl text-zinc-300">  
               Already have an account?{" "}  
               <Link  
-                href="/Login"  
+                href="/"  
                 className="text-amber-400 font-semibold hover:text-yellow-300"  
               >  
                 Login  
               </Link>  
-            </p>  
+            </p>   */}
   
             {/* Home */}  
   

@@ -46,7 +46,7 @@ export default function DashboardPage() {
         credentials: "include",
     });
 
-      router.replace("/login");
+      router.replace("/signup");
     }
 
       // Dashboard Loader

@@ -37,15 +37,13 @@ export async function authenticateDemoUser(
   email: string,
   password: string
 ): Promise<DemoUser | null> {
-  // Password is validated by validators.ts.
-  // We don't store passwords in this demo architecture.
-
   const demoUser = await getDemoUser();
 
   if (!demoUser) {
     return null;
   }
 
+  // Check email
   if (
     normalizeEmail(demoUser.email) !==
     normalizeEmail(email)
@@ -53,9 +51,13 @@ export async function authenticateDemoUser(
     return null;
   }
 
+  // Check password
+  if (demoUser.password !== password) {
+    return null;
+  }
+
   return demoUser;
 }
-
 /**
  * Return every wallet.
  * Used by the Admin dashboard.
