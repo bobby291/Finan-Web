@@ -37,7 +37,6 @@ export async function middleware(request: NextRequest) {
    */
   const protectedRoutes = [
     "/dashboard",
-    "/admin",
   ];
 
   const requiresAuth = protectedRoutes.some((route) =>
@@ -70,6 +69,5 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/admin/:path*",
   ],
 };

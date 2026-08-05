@@ -37,6 +37,7 @@ export async function authenticateDemoUser(
   email: string,
   password: string
 ): Promise<DemoUser | null> {
+  
   const demoUser = await getDemoUser();
 
   if (!demoUser) {
