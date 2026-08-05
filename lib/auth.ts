@@ -1,111 +1,140 @@
 // lib/auth.ts
 
 import { walletStore } from "./walletStore";
-import { User, Wallet } from "./types";
+import { Wallet } from "./types";
+import { getDemoUser } from "./session";
+import { DemoUser } from "./types";
 
-interface MockUser extends User {
-  password: string;
-}
-
-const userStore = new Map<string, MockUser>();
-
+/**
+ * Normalize email for consistent storage and lookups.
+ */
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-export function userExists(email: string): boolean {
-  return userStore.has(normalizeEmail(email));
-}
-
-export function registerUser(
-  name: string,
-  email: string,
-  password: string
-): Wallet {
-  const normalizedEmail = normalizeEmail(email);
-
-  const user: MockUser = {
-    name: name.trim(),
-    email: normalizedEmail,
-    password,
-  };
-
-  userStore.set(normalizedEmail, user);
-
-  return walletStore.getOrCreateWallet({
-    name: user.name,
-    email: user.email,
-  });
-}
-
-export function authenticateUser(
-  email: string,
-  password: string
-): User | null {
-  const normalizedEmail = normalizeEmail(email);
-
-  const user = userStore.get(normalizedEmail);
-
-  if (!user) {
-    return null;
-  }
-
-  if (user.password !== password) {
-    return null;
-  }
-
-  walletStore.getOrCreateWallet({
-    name: user.name,
-    email: user.email,
-  });
-
-  return {
-    name: user.name,
-    email: user.email,
-  };
-}
-
-export function getUser(email: string): User | null {
-  const user = userStore.get(normalizeEmail(email));
-
-  if (!user) {
-    return null;
-  }
-
-  return {
-    name: user.name,
-    email: user.email,
-  };
-}
-
+/**
+ * Always return a wallet.
+ * If one doesn't exist yet, it is created automatically.
+ */
 export function getUserWallet(
   email: string,
-  name?: string
+  name: string
 ): Wallet {
-  const normalizedEmail = normalizeEmail(email);
-
-  let user = userStore.get(normalizedEmail);
-
-  if (!user) {
-    if (!name) {
-      throw new Error("User not found");
-    }
-
-    user = {
-      name,
-      email: normalizedEmail,
-      password: "",
-    };
-
-    userStore.set(normalizedEmail, user);
-  }
-
   return walletStore.getOrCreateWallet({
-    name: user.name,
-    email: user.email,
+    email: normalizeEmail(email),
+    name: name.trim(),
   });
 }
 
-export function getAllUsers(): User[] {
-  return Array.from(userStore.values()).map(({ password, ...user }) => user);
+/**
+ * Authenticate a demo user.
+ *
+ * Since this project has no database, authentication
+ * is performed using the signed demo cookie that was
+ * created during signup.
+ */
+export async function authenticateDemoUser(
+  email: string,
+  password: string
+): Promise<DemoUser | null> {
+  // Password is validated by validators.ts.
+  // We don't store passwords in this demo architecture.
+
+  const demoUser = await getDemoUser();
+
+  if (!demoUser) {
+    return null;
+  }
+
+  if (
+    normalizeEmail(demoUser.email) !==
+    normalizeEmail(email)
+  ) {
+    return null;
+  }
+
+  return demoUser;
+}
+
+/**
+ * Return every wallet.
+ * Used by the Admin dashboard.
+ */
+export function getAllWallets(): Wallet[] {
+  return walletStore.getAllWallets();
+}
+
+/**
+ * Add funds to a wallet.
+ */
+export function addFunds(
+  email: string,
+  name: string,
+  amount: number
+): Wallet {
+  return walletStore.addFunds(
+    normalizeEmail(email),
+    name.trim(),
+    amount
+  );
+}
+
+/**
+ * Replace the wallet balance.
+ */
+export function setBalance(
+  email: string,
+  name: string,
+  balance: number
+): Wallet {
+  return walletStore.setBalance(
+    normalizeEmail(email),
+    name.trim(),
+    balance
+  );
+}
+
+/**
+ * Update invested balance.
+ */
+export function setInvestedBalance(
+  email: string,
+  name: string,
+  amount: number
+): Wallet {
+  return walletStore.setInvestedBalance(
+    normalizeEmail(email),
+    name.trim(),
+    amount
+  );
+}
+
+/**
+ * Update total profit.
+ */
+export function setProfit(
+  email: string,
+  name: string,
+  profit: number
+): Wallet {
+  return walletStore.setProfit(
+    normalizeEmail(email),
+    name.trim(),
+    profit
+  );
+}
+
+/**
+ * Withdraw funds.
+ */
+export function withdrawFunds(
+  email: string,
+  name: string,
+  amount: number
+): Wallet {
+  return walletStore.withdraw(
+    normalizeEmail(email),
+    name.trim(),
+    amount
+  );
 }

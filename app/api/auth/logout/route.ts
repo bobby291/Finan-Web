@@ -1,15 +1,23 @@
+// app/api/auth/logout/route.ts
+
 import { NextResponse } from "next/server";
-import { deleteSession } from "@/lib/session";
+import {
+  deleteSession,
+  deleteDemoUserCookie,
+} from "@/lib/session";
 
 /**
  * POST /api/auth/logout
  *
- * Deletes the signed HTTP-only session cookie and logs the user out.
+ * Clears all authentication cookies.
  */
 export async function POST() {
   try {
-    // Remove the session cookie
+    // Remove session cookie
     await deleteSession();
+
+    // Remove demo user cookie
+    await deleteDemoUserCookie();
 
     return NextResponse.json(
       {
@@ -21,7 +29,7 @@ export async function POST() {
       }
     );
   } catch (error) {
-    console.error("Logout error:", error);
+    console.error("Logout Error:", error);
 
     return NextResponse.json(
       {

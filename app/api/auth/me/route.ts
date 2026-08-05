@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 
-/**
- * GET /api/auth/me
- *
- * Returns the currently authenticated user based on
- * the signed HTTP-only session cookie.
- */
 export async function GET() {
   try {
     const user = await getCurrentUser();
@@ -14,7 +8,9 @@ export async function GET() {
     if (!user) {
       return NextResponse.json(
         {
-          error: "Unauthorized",
+          success: false,
+          authenticated: false,
+          user: null,
         },
         {
           status: 401,
@@ -24,6 +20,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
+        success: true,
         authenticated: true,
         user: {
           name: user.name,
@@ -35,10 +32,12 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error("Get current user error:", error);
+    console.error("GET /api/auth/me:", error);
 
     return NextResponse.json(
       {
+        success: false,
+        authenticated: false,
         error: "Internal Server Error",
       },
       {

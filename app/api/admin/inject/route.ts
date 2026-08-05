@@ -1,39 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminSecret } from "@/lib/admin";
-import { walletStore } from "@/lib/walletStore";
-
-
-/**
- * POST /api/admin/inject
- *
- * Demo admin endpoint for manually adjusting wallet balances.
- *
- * Body:
- *
- * {
- *   "email": "user@email.com",
- *   "amount": 100
- * }
- *
- * OR
- *
- * {
- *   "email": "user@email.com",
- *   "balance": 500
- * }
- *
- */
-
+import {
+  addFunds,
+  getUserWallet,
+  setBalance,
+} from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
     const adminSecret = req.headers.get("x-admin-secret");
 
-
-    // Protect endpoint
     if (!verifyAdminSecret(adminSecret)) {
       return NextResponse.json(
         {
+          success: false,
           error: "Unauthorized admin access",
         },
         {
@@ -42,13 +22,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-
     const body = await req.json().catch(() => null);
-
 
     if (!body || typeof body !== "object") {
       return NextResponse.json(
         {
+          success: false,
           error: "Invalid request body",
         },
         {
@@ -57,22 +36,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-
     const {
       email,
       amount,
       balance,
+      name,
     } = body as {
       email?: string;
+      name?: string;
       amount?: number;
       balance?: number;
     };
 
-
     if (!email) {
       return NextResponse.json(
         {
-          error: "Email is required",
+          success: false,
+          error: "Email is required.",
         },
         {
           status: 400,
@@ -80,91 +60,55 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Default name if one isn't provided
+    const userName = name?.trim() || email.split("@")[0];
+
+    // Ensure the wallet exists
+    getUserWallet(email, userName);
 
     let updatedWallet;
 
-
-    /**
-     * Replace balance completely
-     */
     if (typeof balance === "number") {
-
-      updatedWallet = walletStore.setBalance(
+      updatedWallet = setBalance(
         email,
+        userName,
         balance
       );
-
-    }
-
-
-    /**
-     * Add funds
-     */
-    else if (typeof amount === "number") {
-
-      updatedWallet = walletStore.addFunds(
+    } else if (typeof amount === "number") {
+      updatedWallet = addFunds(
         email,
+        userName,
         amount
       );
-
-    }
-
-
-    else {
-
+    } else {
       return NextResponse.json(
         {
-          error:
-            "Provide either amount or balance",
+          success: false,
+          error: "Provide either amount or balance.",
         },
         {
           status: 400,
         }
       );
-
     }
-
-
-
-    if (!updatedWallet) {
-      return NextResponse.json(
-        {
-          error:
-            "Wallet not found for this email",
-        },
-        {
-          status: 404,
-        }
-      );
-    }
-
-
 
     return NextResponse.json(
       {
         success: true,
-        message:
-          "Wallet updated successfully.",
+        message: "Wallet updated successfully.",
         wallet: updatedWallet,
       },
       {
         status: 200,
       }
     );
-
-
   } catch (error) {
-
-    console.error(
-      "Admin injection error:",
-      error
-    );
-
+    console.error("Admin injection error:", error);
 
     return NextResponse.json(
       {
-        error:
-          "Internal Server Error",
+        success: false,
+        error: "Internal Server Error",
       },
       {
         status: 500,

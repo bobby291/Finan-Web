@@ -11,27 +11,25 @@ class WalletStore {
   private wallets = new Map<string, Wallet>();
 
   /**
-   * Get an existing wallet or create one.
+   * Returns an existing wallet or automatically creates one.
    */
   getOrCreateWallet(input: CreateWalletInput): Wallet {
     const email = input.email.trim().toLowerCase();
 
-    const existing = this.wallets.get(email);
+    const existingWallet = this.wallets.get(email);
 
-    if (existing) {
-      return existing;
+    if (existingWallet) {
+      return existingWallet;
     }
 
     const wallet: Wallet = {
-      name: input.name,
+      name: input.name.trim(),
       email,
 
       balance: 0.16,
-
       investedBalance: 0,
 
       totalDeposits: 0,
-
       totalWithdrawals: 0,
 
       totalProfit: 0,
@@ -43,31 +41,37 @@ class WalletStore {
   }
 
   /**
-   * Get wallet by email.
+   * Returns a wallet if it exists.
    */
   getWallet(email: string): Wallet | undefined {
     return this.wallets.get(email.trim().toLowerCase());
   }
 
   /**
-   * Return all wallets.
+   * Returns every wallet.
    */
   getAllWallets(): Wallet[] {
     return Array.from(this.wallets.values());
   }
 
   /**
-   * Add funds.
+   * Deposit funds.
    */
-  addFunds(email: string, amount: number): Wallet | null {
-    const wallet = this.getWallet(email);
-
-    if (!wallet) {
-      return null;
+  addFunds(
+    email: string,
+    name: string,
+    amount: number
+  ): Wallet {
+    if (amount <= 0) {
+      throw new Error("Deposit amount must be greater than zero.");
     }
 
-    wallet.balance += amount;
+    const wallet = this.getOrCreateWallet({
+      email,
+      name,
+    });
 
+    wallet.balance += amount;
     wallet.totalDeposits += amount;
 
     return wallet;
@@ -76,12 +80,19 @@ class WalletStore {
   /**
    * Replace wallet balance.
    */
-  setBalance(email: string, balance: number): Wallet | null {
-    const wallet = this.getWallet(email);
-
-    if (!wallet) {
-      return null;
+  setBalance(
+    email: string,
+    name: string,
+    balance: number
+  ): Wallet {
+    if (balance < 0) {
+      throw new Error("Balance cannot be negative.");
     }
+
+    const wallet = this.getOrCreateWallet({
+      email,
+      name,
+    });
 
     wallet.balance = balance;
 
@@ -89,29 +100,21 @@ class WalletStore {
   }
 
   /**
-   * Update profit.
-   */
-  setProfit(email: string, profit: number): Wallet | null {
-    const wallet = this.getWallet(email);
-
-    if (!wallet) {
-      return null;
-    }
-
-    wallet.totalProfit = profit;
-
-    return wallet;
-  }
-
-  /**
    * Update invested balance.
    */
-  setInvestedBalance(email: string, amount: number): Wallet | null {
-    const wallet = this.getWallet(email);
-
-    if (!wallet) {
-      return null;
+  setInvestedBalance(
+    email: string,
+    name: string,
+    amount: number
+  ): Wallet {
+    if (amount < 0) {
+      throw new Error("Invested balance cannot be negative.");
     }
+
+    const wallet = this.getOrCreateWallet({
+      email,
+      name,
+    });
 
     wallet.investedBalance = amount;
 
@@ -119,21 +122,45 @@ class WalletStore {
   }
 
   /**
-   * Record withdrawal.
+   * Update total profit.
    */
-  withdraw(email: string, amount: number): Wallet | null {
-    const wallet = this.getWallet(email);
+  setProfit(
+    email: string,
+    name: string,
+    profit: number
+  ): Wallet {
+    const wallet = this.getOrCreateWallet({
+      email,
+      name,
+    });
 
-    if (!wallet) {
-      return null;
+    wallet.totalProfit = profit;
+
+    return wallet;
+  }
+
+  /**
+   * Withdraw funds.
+   */
+  withdraw(
+    email: string,
+    name: string,
+    amount: number
+  ): Wallet {
+    if (amount <= 0) {
+      throw new Error("Withdrawal amount must be greater than zero.");
     }
 
+    const wallet = this.getOrCreateWallet({
+      email,
+      name,
+    });
+
     if (wallet.balance < amount) {
-      return null;
+      throw new Error("Insufficient balance.");
     }
 
     wallet.balance -= amount;
-
     wallet.totalWithdrawals += amount;
 
     return wallet;

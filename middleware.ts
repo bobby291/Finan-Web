@@ -1,12 +1,11 @@
+// proxy.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-
-const SESSION_COOKIE_NAME = "session";
-
+const SESSION_COOKIE = "session";
 
 const secret = process.env.SESSION_SECRET;
-
 
 if (!secret) {
   throw new Error(
@@ -14,114 +13,63 @@ if (!secret) {
   );
 }
 
-
 const secretKey = new TextEncoder().encode(secret);
 
-
-
-async function verifySessionToken(
-  token: string
-) {
+/**
+ * Verify the signed session cookie.
+ */
+async function verifySession(token: string) {
   try {
-    const { payload } = await jwtVerify(
-      token,
-      secretKey
-    );
+    const { payload } = await jwtVerify(token, secretKey);
 
     return payload;
-
   } catch {
     return null;
   }
 }
 
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-
-export async function middleware(
-  request: NextRequest
-) {
-
-  const pathname = request.nextUrl.pathname;
-
-
-  /*
-    Protected user routes
-
-    Add more routes here later:
-    /portfolio
-    /settings
-    /investments
-  */
-
+  /**
+   * Protected routes.
+   * Add more routes here whenever needed.
+   */
   const protectedRoutes = [
     "/dashboard",
+    "/admin",
   ];
 
-
-
-  const requiresAuth = protectedRoutes.some(
-    (route) =>
-      pathname.startsWith(route)
+  const requiresAuth = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
   );
-
-
 
   if (!requiresAuth) {
     return NextResponse.next();
   }
 
-
-
-  const sessionCookie =
-    request.cookies.get(
-      SESSION_COOKIE_NAME
-    )?.value;
-
-
+  const sessionCookie = request.cookies.get(SESSION_COOKIE)?.value;
 
   if (!sessionCookie) {
-
     return NextResponse.redirect(
-      new URL(
-        "/login",
-        request.url
-      )
+      new URL("/login", request.url)
     );
-
   }
 
-
-
-  const session =
-    await verifySessionToken(
-      sessionCookie
-    );
-
-
+  const session = await verifySession(sessionCookie);
 
   if (!session) {
-
     return NextResponse.redirect(
-      new URL(
-        "/login",
-        request.url
-      )
+      new URL("/login", request.url)
     );
-
   }
 
-
-
   return NextResponse.next();
-
 }
 
-
-
 export const config = {
-
   matcher: [
     "/dashboard/:path*",
+    "/admin/:path*",
   ],
-
 };

@@ -1,27 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSignup } from "@/lib/validators";
-import { userExists, registerUser } from "@/lib/auth";
-import { createSession } from "@/lib/session";
+import { createSession, createDemoUserCookie } from "@/lib/session";
+import { getUserWallet } from "@/lib/auth";
 
-/**
- * POST /api/auth/signup
- */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => null);
 
     if (!body || typeof body !== "object") {
       return NextResponse.json(
-        { error: "Invalid request body" },
+        { error: "Invalid request body." },
         { status: 400 }
       );
     }
 
-    const { name, email, password } = body as {
-      name?: string;
-      email?: string;
-      password?: string;
-    };
+    const { name, email, password } = body;
 
     const error = validateSignup({
       name: name ?? "",
@@ -30,32 +23,30 @@ export async function POST(req: NextRequest) {
     });
 
     if (error) {
-      return NextResponse.json({ error }, { status: 400 });
-    }
-
-    if (userExists(email!)) {
       return NextResponse.json(
-        {
-          error: "A user with that email already exists.",
-        },
-        {
-          status: 409,
-        }
+        { error },
+        { status: 400 }
       );
     }
 
-    // Creates the mock user and the default wallet ($0.16)
-    const wallet = registerUser(
-      name!,
-      email!,
-      password!
-    );
-
-    // Creates the signed HTTP-only session cookie
-    await createSession({
-      name: wallet.name,
-      email: wallet.email,
+    // Create the signed demo-user cookie
+    await createDemoUserCookie({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password,
     });
+
+    // Create the authenticated session
+    await createSession({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+    });
+
+    // Automatically create the wallet
+    const wallet = getUserWallet(
+      email,
+      name
+    );
 
     return NextResponse.json(
       {
@@ -64,6 +55,13 @@ export async function POST(req: NextRequest) {
         user: {
           name: wallet.name,
           email: wallet.email,
+        },
+        wallet: {
+          balance: wallet.balance,
+          investedBalance: wallet.investedBalance,
+          totalDeposits: wallet.totalDeposits,
+          totalWithdrawals: wallet.totalWithdrawals,
+          totalProfit: wallet.totalProfit,
         },
       },
       {
@@ -75,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        error: "Internal Server Error",
+        error: "Unable to create account.",
       },
       {
         status: 500,

@@ -1,61 +1,74 @@
 // lib/session.ts
 
 import { cookies } from "next/headers";
-import { SignJWT, jwtVerify } from "jose";
-import { SessionPayload } from "./types";
+import {
+  SignJWT,
+  jwtVerify,
+  type JWTPayload,
+} from "jose";
+import {
+  SessionPayload,
+  DemoUser,
+} from "./types";
 
-const SESSION_COOKIE_NAME = "session";
+const SESSION_COOKIE = "session";
+const DEMO_COOKIE = "demo_user";
 
 const secret = process.env.SESSION_SECRET;
 
 if (!secret) {
-  throw new Error(
-    "SESSION_SECRET is missing. Please add it to your .env.local file."
-  );
+  throw new Error("SESSION_SECRET is missing.");
 }
 
 const secretKey = new TextEncoder().encode(secret);
 
-const SESSION_DURATION = 60 * 60 * 24 * 7; // 7 days
+const MAX_AGE = 60 * 60 * 24 * 7;
 
 /**
- * Create a signed session cookie
+ * Sign any payload into a JWT.
  */
-export async function createSession(user: SessionPayload) {
-  const token = await new SignJWT({
-    name: user.name,
-    email: user.email,
-  })
+async function sign(
+  payload: JWTPayload
+): Promise<string> {
+  return await new SignJWT(payload)
     .setProtectedHeader({
       alg: "HS256",
     })
     .setIssuedAt()
-    .setExpirationTime(`${SESSION_DURATION}s`)
+    .setExpirationTime(`${MAX_AGE}s`)
     .sign(secretKey);
+}
 
-  const cookieStore = await cookies();
+/**
+ * Create the authenticated session.
+ */
+export async function createSession(
+  user: SessionPayload
+): Promise<void> {
+  const token = await sign({
+    name: user.name,
+    email: user.email,
+  });
 
-  cookieStore.set({
-    name: SESSION_COOKIE_NAME,
+  const store = await cookies();
+
+  store.set({
+    name: SESSION_COOKIE,
     value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: SESSION_DURATION,
+    maxAge: MAX_AGE,
   });
-
-  return token;
 }
 
 /**
- * Verify session cookie
+ * Verify session.
  */
 export async function verifySession(): Promise<SessionPayload | null> {
   try {
-    const cookieStore = await cookies();
-
-    const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    const token = (await cookies()).get(SESSION_COOKIE)?.value;
 
     if (!token) {
       return null;
@@ -73,24 +86,73 @@ export async function verifySession(): Promise<SessionPayload | null> {
 }
 
 /**
- * Delete session cookie
+ * Save demo user cookie.
  */
-export async function deleteSession() {
-  const cookieStore = await cookies();
+export async function createDemoUserCookie(
+  user: DemoUser
+): Promise<void> {
+  const token = await sign({
+    name: user.name,
+    email: user.email,
+    password: user.password,
+  });
 
-  cookieStore.set({
-    name: SESSION_COOKIE_NAME,
-    value: "",
+  const store = await cookies();
+
+  store.set({
+    name: DEMO_COOKIE,
+    value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    expires: new Date(0),
+    maxAge: MAX_AGE,
   });
 }
 
 /**
- * Get currently authenticated user
+ * Read demo user cookie.
+ */
+export async function getDemoUser(): Promise<DemoUser | null> {
+  try {
+    const token = (await cookies()).get(DEMO_COOKIE)?.value;
+
+    if (!token) {
+      return null;
+    }
+
+    const { payload } = await jwtVerify(token, secretKey);
+
+    return {
+      name: payload.name as string,
+      email: payload.email as string,
+      password: payload.password as string,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Delete session.
+ */
+export async function deleteSession(): Promise<void> {
+  const store = await cookies();
+
+  store.delete(SESSION_COOKIE);
+}
+
+/**
+ * Delete demo user cookie.
+ */
+export async function deleteDemoUserCookie(): Promise<void> {
+  const store = await cookies();
+
+  store.delete(DEMO_COOKIE);
+}
+
+/**
+ * Current authenticated user.
  */
 export async function getCurrentUser(): Promise<SessionPayload | null> {
   return verifySession();

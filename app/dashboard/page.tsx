@@ -20,92 +20,98 @@ export default function DashboardPage() {
 
     const router = useRouter();
 
-    const [loading, setloading] = useState(true);
-    const [error, setError] = useState("");
-    const [user, setUser] = useState({
-        name: "",
-        email: "",
-    });
+    const [loading, setLoading] = useState(true);
 
-    const [wallet,  setWallet] = useState({
-        balance: 0,
-        investedBalance: 0,
-        totalProfit: 0,
-        totalDeposits: 0,
-        totalWithdrawals: 0,
-    });
+    const [error, setError] = useState("");
 
     const [showBalance, setShowBalance] = useState(true);
 
-  //Dashboard loader
-  async function loadDashboard() {
+    const [user, setUser] = useState({
+      name: "",
+      email: "",
+    });
+
+    const [wallet, setWallet] = useState({
+      balance: 0,
+      investedBalance: 0,
+      totalProfit: 0,
+      totalDeposits: 0,
+      totalWithdrawals: 0,
+    });
+
+      // Logout Loader
+    async function logout() {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+    });
+
+      router.replace("/login");
+    }
+
+      // Dashboard Loader
+    async function loadDashboard() {
     try {
-        setloading(true);
-        setError("");
+      setLoading(true);
+      setError("");
 
-        //Fetch authenticated user
-        const meResponse = await fetch("/api/auth/me", {
-            credentials: "include",
-        });
+      const meResponse = await fetch("/api/auth/me", {
+        credentials: "include",
+        cache: "no-store",
+      });
 
-       // if (meResponse.status === 401) {
-        //    router.push("/login");
-          //  return;
-       // }
-       console.log("Status: meResponse.status");
+      if (meResponse.status === 401) {
+        router.replace("/Login");
+        return;
+      }
 
-        const meData = await meResponse.json();
+      if (!meResponse.ok) {
+        throw new Error("Unable to load user.");
+      }
 
-        console.log("Response:", meData);
+      const meData = await meResponse.json();
 
-        setUser(meData.user);
+      setUser(meData.user);
 
-        //Fetch wallet
-        const walletResponse = await fetch("/api/account", {
-            credentials: "include",
-        });
+      const accountResponse = await fetch("/api/account", {
+        credentials: "include",
+        cache: "no-store",
+      });
 
-        console.log("Wallet Status:", walletResponse.status)
+      if (!accountResponse.ok) {
+        throw new Error("Unable to load wallet.");
+      }
 
-        if (!walletResponse.ok) {
-            throw new Error("Unable to load wallet");
-        }
+      const accountData = await accountResponse.json();
 
-        const walletData = await walletResponse.json();
-
-        console.log("Wallet Response:", walletData);
-
-        setWallet(walletData.account);
+      setWallet(accountData.account);
     } catch (err) {
-        setError(
-            err instanceof Error 
-            ? err.message 
-            : "Something went wrong."
-        );
-    }   finally {
-        setloading(false);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong."
+      );
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadDashboard();
-  }, []);
+  loadDashboard();
+}, []);
 
-    if (loading) {
-        return (
-            <main className="min-h-screen bg-black flex items-center justify-center">
-                <div className="text-center">
-                    <div className="h-16 w-16 border-t-transparent rounded-full animate-spin mx-auto">
-                        <p className="mt-6 text-xl text-zinc-400">
-                            Loading Dashboard.....
-                        </p>
-                    </div>
-                </div>
-
-            </main>
-        )
-    }
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-black flex items-center justify-center text-white">
+        <div className="text-center">
+          <div className="h-14 w-14 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="mt-6 text-zinc-400">
+            Loading Dashboard...
+          </p>
+        </div>
+      </main>
+    );
+  }
   return (
     <main className="min-h-screen bg-[#050505] text-white">
 
@@ -142,13 +148,13 @@ export default function DashboardPage() {
 
           {/* Logout */}
 
-          <Link
-            href="/login"
+          <button
+            onClick={logout}
             className="flex items-center gap-2 bg-gradient-to-r from-yellow-300 to-amber-500 text-black px-5 py-3 rounded-xl font-semibold hover:scale-105 duration-300"
           >
             <LogOut size={18} />
             Logout
-          </Link>
+          </button>
 
         </div>
       </header>
@@ -225,7 +231,10 @@ export default function DashboardPage() {
               </div>
 
               <h1 className="text-6xl md:text-7xl font-extrabold mt-5 bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
-                ${wallet.balance.toFixed(2)} USD
+                {showBalance
+                  ? `$${wallet.balance.toFixed(2)}`
+                  : "••••••"
+                } USD
               </h1>
 
               {/* Stats */}

@@ -1,20 +1,16 @@
 import { NextResponse } from "next/server";
-import { verifySession } from "@/lib/session";
+import { getCurrentUser } from "@/lib/session";
 import { getUserWallet } from "@/lib/auth";
 
-/**
- * GET /api/account
- *
- * Returns the authenticated user's wallet.
- */
 export async function GET() {
   try {
-    // Verify the signed session cookie
-    const session = await verifySession();
+    // Verify the authenticated session
+    const user = await getCurrentUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json(
         {
+          success: false,
           error: "Unauthorized",
         },
         {
@@ -23,34 +19,27 @@ export async function GET() {
       );
     }
 
-    // Retrieve the user's wallet
+    // Get or automatically create the user's wallet
     const wallet = getUserWallet(
-      session.email,
-      session.name
+      user.email,
+      user.name
     );
 
     return NextResponse.json(
       {
         success: true,
-        account: {
-          name: wallet.name,
-          email: wallet.email,
-          balance: wallet.balance,
-          investedBalance: wallet.investedBalance,
-          totalDeposits: wallet.totalDeposits,
-          totalWithdrawals: wallet.totalWithdrawals,
-          totalProfit: wallet.totalProfit,
-        },
+        account: wallet,
       },
       {
         status: 200,
       }
     );
   } catch (error) {
-    console.error("Account route error:", error);
+    console.error("GET /api/account:", error);
 
     return NextResponse.json(
       {
+        success: false,
         error: "Internal Server Error",
       },
       {
