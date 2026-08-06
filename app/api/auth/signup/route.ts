@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { validateSignup } from "@/lib/validators";
-
 import {
   createDemoUser,
   getUserWallet,
@@ -10,6 +9,8 @@ import {
 import { createSession } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
+  console.log("POST ROUTE HIT");
+
   try {
     const body = await req.json();
 
@@ -17,49 +18,58 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       return NextResponse.json(
-        { error },
-        { status: 400 }
+        {
+          success: false,
+          error,
+        },
+        {
+          status: 400,
+        }
       );
     }
 
-    // Create the demo user
+    // Create/overwrite demo user
     const user = await createDemoUser(
       body.name,
       body.email,
       body.password
     );
 
-    // Create signed session cookie
+    // Create session immediately
     await createSession({
       name: user.name,
       email: user.email,
     });
 
-    // Create or get wallet
+    // Create or update wallet
     const wallet = getUserWallet(
       user.email,
       user.name
     );
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Account created successfully.",
-        user,
-        wallet,
-      },
-      {
-        status: 201,
-      }
-    );
-  } catch (error) {
-    console.error("Signup Error:", error);
+    console.log("USER:", user);
+    console.log("WALLET:", wallet);
 
     return NextResponse.json(
       {
+        success: true,
+        user,
+        wallet,
+        redirect: "/dashboard",
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (err) {
+    console.error("SIGNUP ERROR:", err);
+
+    return NextResponse.json(
+      {
+        success: false,
         error:
-          error instanceof Error
-            ? error.message
+          err instanceof Error
+            ? err.message
             : "Unable to create account.",
       },
       {

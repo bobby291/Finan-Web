@@ -32,26 +32,23 @@ export async function createDemoUser(
 ) {
   email = normalizeEmail(email);
 
-  if (users.has(email)) {
-    throw new Error("User already exists.");
-  }
-
   const user = {
     name: name.trim(),
     email,
     password,
   };
 
+  // Overwrite existing demo user
   users.set(email, user);
 
-  // Automatically create the wallet
-  getUserWallet(email, name);
+  // Ensure wallet exists
+  getUserWallet(user.email, user.name);
 
   return user;
 }
 
 /**
- * Login.
+ * Authenticate demo user.
  */
 export async function authenticateDemoUser(
   email: string,

@@ -38,7 +38,7 @@ export default function SignupPage() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-        },
+        }, credentials: "include", //
         body: JSON.stringify({
             name,
             email,
@@ -201,7 +201,7 @@ export default function SignupPage() {
               className={`w-full h-16 rounded-2xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 text-black font-bold text-2xl flex items-center justify-center gap-5 hover:scale-[1.02] duration-300 ${
                 loading ? "opacity-60 cursor-not-allowed" : "hover:scale-[1.02]"}`}  
             >  {
-              loading ? "Signing In...." : "Sign IN"
+              loading ? "Signing In...." : "Sign In"
             }
               {
                 !loading && <ArrowRight size={30} />  

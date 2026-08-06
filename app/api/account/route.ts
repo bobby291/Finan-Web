@@ -4,10 +4,9 @@ import { getUserWallet } from "@/lib/auth";
 
 export async function GET() {
   try {
-    // Verify the authenticated session
     const user = await getCurrentUser();
 
-    console.log("SESSION USER:", user)
+    console.log("SESSION USER:", user);
 
     if (!user) {
       return NextResponse.json(
@@ -21,11 +20,12 @@ export async function GET() {
       );
     }
 
-    // Get or automatically create the user's wallet
     const wallet = getUserWallet(
       user.email,
       user.name
     );
+
+    console.log("WALLET:", wallet);
 
     return NextResponse.json(
       {

@@ -25,7 +25,7 @@ const secretKey = new TextEncoder().encode(secret);
 const MAX_AGE = 60 * 60 * 24 * 7;
 
 /**
- * Sign any payload into a JWT.
+ * Sign JWT
  */
 async function sign(
   payload: JWTPayload
@@ -40,11 +40,15 @@ async function sign(
 }
 
 /**
- * Create the authenticated session.
+ * Create authenticated session.
  */
 export async function createSession(
   user: SessionPayload
 ): Promise<void> {
+  console.log("========== CREATE SESSION ==========");
+  console.log(user);
+  console.log("====================================");
+
   const token = await sign({
     name: user.name,
     email: user.email,
@@ -71,16 +75,22 @@ export async function verifySession(): Promise<SessionPayload | null> {
     const token = (await cookies()).get(SESSION_COOKIE)?.value;
 
     if (!token) {
+      console.log("No session cookie found.");
       return null;
     }
 
     const { payload } = await jwtVerify(token, secretKey);
 
+    console.log("========== VERIFY SESSION ==========");
+    console.log(payload);
+    console.log("====================================");
+
     return {
       name: payload.name as string,
       email: payload.email as string,
     };
-  } catch {
+  } catch (error) {
+    console.error("verifySession:", error);
     return null;
   }
 }
@@ -91,6 +101,10 @@ export async function verifySession(): Promise<SessionPayload | null> {
 export async function createDemoUserCookie(
   user: DemoUser
 ): Promise<void> {
+  console.log("========== CREATE DEMO USER ==========");
+  console.log(user);
+  console.log("======================================");
+
   const token = await sign({
     name: user.name,
     email: user.email,
@@ -118,17 +132,23 @@ export async function getDemoUser(): Promise<DemoUser | null> {
     const token = (await cookies()).get(DEMO_COOKIE)?.value;
 
     if (!token) {
+      console.log("No demo user cookie.");
       return null;
     }
 
     const { payload } = await jwtVerify(token, secretKey);
+
+    console.log("========== DEMO USER ==========");
+    console.log(payload);
+    console.log("===============================");
 
     return {
       name: payload.name as string,
       email: payload.email as string,
       password: payload.password as string,
     };
-  } catch {
+  } catch (error) {
+    console.error("getDemoUser:", error);
     return null;
   }
 }
@@ -155,5 +175,11 @@ export async function deleteDemoUserCookie(): Promise<void> {
  * Current authenticated user.
  */
 export async function getCurrentUser(): Promise<SessionPayload | null> {
-  return verifySession();
+  const user = await verifySession();
+
+  console.log("========== CURRENT USER ==========");
+  console.log(user);
+  console.log("==================================");
+
+  return user;
 }
