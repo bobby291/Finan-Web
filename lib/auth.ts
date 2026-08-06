@@ -1,20 +1,79 @@
 // lib/auth.ts
 
 import { walletStore } from "./walletStore";
-import { Wallet } from "./types";
-import { getDemoUser } from "./session";
-import { DemoUser } from "./types";
+import type { Wallet } from "./types";
 
 /**
- * Normalize email for consistent storage and lookups.
+ * Normalize email.
  */
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
 /**
- * Always return a wallet.
- * If one doesn't exist yet, it is created automatically.
+ * Demo users stored in memory.
+ */
+const users = new Map<
+  string,
+  {
+    name: string;
+    email: string;
+    password: string;
+  }
+>();
+
+/**
+ * Create a new demo user.
+ */
+export async function createDemoUser(
+  name: string,
+  email: string,
+  password: string
+) {
+  email = normalizeEmail(email);
+
+  if (users.has(email)) {
+    throw new Error("User already exists.");
+  }
+
+  const user = {
+    name: name.trim(),
+    email,
+    password,
+  };
+
+  users.set(email, user);
+
+  // Automatically create the wallet
+  getUserWallet(email, name);
+
+  return user;
+}
+
+/**
+ * Login.
+ */
+export async function authenticateDemoUser(
+  email: string,
+  password: string
+) {
+  email = normalizeEmail(email);
+
+  const user = users.get(email);
+
+  if (!user) {
+    return null;
+  }
+
+  if (user.password !== password) {
+    return null;
+  }
+
+  return user;
+}
+
+/**
+ * Get or create wallet.
  */
 export function getUserWallet(
   email: string,
@@ -27,49 +86,12 @@ export function getUserWallet(
 }
 
 /**
- * Authenticate a demo user.
- *
- * Since this project has no database, authentication
- * is performed using the signed demo cookie that was
- * created during signup.
- */
-export async function authenticateDemoUser(
-  email: string,
-  password: string
-): Promise<DemoUser | null> {
-  
-  const demoUser = await getDemoUser();
-
-  if (!demoUser) {
-    return null;
-  }
-
-  // Check email
-  if (
-    normalizeEmail(demoUser.email) !==
-    normalizeEmail(email)
-  ) {
-    return null;
-  }
-
-  // Check password
-  if (demoUser.password !== password) {
-    return null;
-  }
-
-  return demoUser;
-}
-/**
- * Return every wallet.
- * Used by the Admin dashboard.
+ * Admin helpers.
  */
 export function getAllWallets(): Wallet[] {
   return walletStore.getAllWallets();
 }
 
-/**
- * Add funds to a wallet.
- */
 export function addFunds(
   email: string,
   name: string,
@@ -82,9 +104,6 @@ export function addFunds(
   );
 }
 
-/**
- * Replace the wallet balance.
- */
 export function setBalance(
   email: string,
   name: string,
@@ -97,9 +116,6 @@ export function setBalance(
   );
 }
 
-/**
- * Update invested balance.
- */
 export function setInvestedBalance(
   email: string,
   name: string,
@@ -112,9 +128,6 @@ export function setInvestedBalance(
   );
 }
 
-/**
- * Update total profit.
- */
 export function setProfit(
   email: string,
   name: string,
@@ -127,9 +140,6 @@ export function setProfit(
   );
 }
 
-/**
- * Withdraw funds.
- */
 export function withdrawFunds(
   email: string,
   name: string,

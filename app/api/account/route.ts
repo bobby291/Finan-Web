@@ -7,6 +7,8 @@ export async function GET() {
     // Verify the authenticated session
     const user = await getCurrentUser();
 
+    console.log("SESSION USER:", user)
+
     if (!user) {
       return NextResponse.json(
         {

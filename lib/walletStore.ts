@@ -1,5 +1,6 @@
 // lib/walletStore.ts
 
+import { normalize } from "path";
 import { Wallet } from "./types";
 
 export interface CreateWalletInput {
@@ -23,35 +24,22 @@ class WalletStore {
     }
 
     const isSpecialUser = 
-      email === "Wadevanderwyk@gmail.com" && 
+      email === "wadevanderwyk@gmail.com" && 
       input.name.trim().toLowerCase() === "wade vanderwyk";
 
-      const wallet: Wallet =
-      isSpecialUser
-      ? {
-          name: "Wade VandDerwyk",
-          email,
+      const wallet: Wallet = {
+      name: input.name.trim(),
+      email,
+      
+      balance: isSpecialUser ? 200 : 0.16,
+      investedBalance: isSpecialUser ? 10 : 0,
 
-          balance: 200,
-          investedBalance: 10,
+      totalDeposits: isSpecialUser ? 0 : 0,
+      totalWithdrawals: isSpecialUser ? 0 : 0,
 
-          totalDeposits: 0,
-          totalWithdrawals: 0,
+      totalProfit: isSpecialUser ? 7 : 0,
+    };
 
-          totalProfit: 7,
-        }
-        : {
-          name: input.name.trim(),
-          email,
-
-          balance: 200,
-          investedBalance: 0,
-
-          totalDeposits: 0,
-          totalWithdrawals: 0,
-
-          totalProfit: 0,
-        };
 
     this.wallets.set(email, wallet);
 
